@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: borderwatch
+    runtime: python
+    buildCommand: bash build.sh
+    startCommand: gunicorn app:app -c gunicorn.conf.py
+    plan: free
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11.0"
