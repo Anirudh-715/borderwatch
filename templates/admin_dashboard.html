@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Admin <span>Dashboard</span></h1>
+        <div class="page-subtitle">All Incidents — Command Overview</div>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.total }}</span>
+        <span class="stat-label">Total</span>
+    </div>
+    <div class="stat-card info">
+        <span class="stat-number">{{ stats.reported }}</span>
+        <span class="stat-label">Reported</span>
+    </div>
+    <div class="stat-card warning">
+        <span class="stat-number">{{ stats.investigating }}</span>
+        <span class="stat-label">Investigating</span>
+    </div>
+    <div class="stat-card resolved">
+        <span class="stat-number">{{ stats.resolved }}</span>
+        <span class="stat-label">Resolved</span>
+    </div>
+    <div class="stat-card danger">
+        <span class="stat-number">{{ stats.high }}</span>
+        <span class="stat-label">High Severity</span>
+    </div>
+    <div class="stat-card warning">
+        <span class="stat-number">{{ stats.medium }}</span>
+        <span class="stat-label">Medium</span>
+    </div>
+    <div class="stat-card info">
+        <span class="stat-number">{{ stats.low }}</span>
+        <span class="stat-label">Low</span>
+    </div>
+</div>
+
+<!-- Filters -->
+<form method="GET" action="{{ url_for('admin.dashboard') }}">
+    <div class="filter-bar">
+        <div class="form-group">
+            <label>Filter by Severity</label>
+            <select name="severity">
+                <option value="">All Severities</option>
+                <option value="High" {% if severity_filter == 'High' %}selected{% endif %}>High</option>
+                <option value="Medium" {% if severity_filter == 'Medium' %}selected{% endif %}>Medium</option>
+                <option value="Low" {% if severity_filter == 'Low' %}selected{% endif %}>Low</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Filter by Status</label>
+            <select name="status">
+                <option value="">All Statuses</option>
+                <option value="Reported" {% if status_filter == 'Reported' %}selected{% endif %}>Reported</option>
+                <option value="Under Investigation" {% if status_filter == 'Under Investigation' %}selected{% endif %}>Under Investigation</option>
+                <option value="Resolved" {% if status_filter == 'Resolved' %}selected{% endif %}>Resolved</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Filter by Date</label>
+            <input type="date" name="date" value="{{ date_filter }}">
+        </div>
+        <div style="display:flex;gap:8px;flex-shrink:0;">
+            <button type="submit" class="btn btn-outline btn-sm">Apply</button>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-sm" style="background:transparent;color:var(--text-muted);border:1px solid var(--border);">Clear</a>
+        </div>
+    </div>
+</form>
+
+<!-- Incidents Table -->
+<div class="table-container">
+    <div class="table-header">
+        <span class="table-title">All Incident Reports</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">{{ incidents|length }} records</span>
+    </div>
+    {% if incidents %}
+    <table>
+        <thead>
+            <tr>
+                <th>#ID</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Officer</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Date/Time</th>
+                <th>Images</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for incident in incidents %}
+            <tr onclick="window.location='{{ url_for('admin.incident_detail', incident_id=incident.id) }}'">
+                <td><span class="id-badge">#{{ '%04d' % incident.id }}</span></td>
+                <td><a href="{{ url_for('admin.incident_detail', incident_id=incident.id) }}" class="incident-link">{{ incident.type }}</a></td>
+                <td>{{ incident.location }}</td>
+                <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);">{{ incident.full_name }}</td>
+                <td><span class="badge badge-{{ incident.severity|lower }}">{{ incident.severity }}</span></td>
+                <td>
+                    {% if incident.status == 'Reported' %}
+                    <span class="badge badge-reported">{{ incident.status }}</span>
+                    {% elif incident.status == 'Under Investigation' %}
+                    <span class="badge badge-investigating">Investigating</span>
+                    {% else %}
+                    <span class="badge badge-resolved">{{ incident.status }}</span>
+                    {% endif %}
+                </td>
+                <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);">{{ incident.datetime[:16] if incident.datetime else '—' }}</td>
+                <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">{{ incident.image_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <span class="empty-state-icon">📋</span>
+        <div class="empty-state-text">No incidents match the current filters</div>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

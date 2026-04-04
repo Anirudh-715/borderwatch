@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}BorderWatch{% endblock %} — Border Monitoring System</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if session.user_id %}
+    <nav class="navbar">
+        <div class="nav-brand">
+            <span class="nav-icon">⬡</span>
+            <span class="nav-title">BORDER<strong>WATCH</strong></span>
+            <span class="nav-badge">SECURE</span>
+        </div>
+        <div class="nav-center">
+            <span class="nav-user-info">
+                <span class="user-dot"></span>
+                {{ session.full_name }} 
+                <span class="role-chip role-{{ session.role }}">{{ session.role|upper }}</span>
+            </span>
+        </div>
+        <div class="nav-links">
+            {% if session.role == 'admin' %}
+                <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if request.endpoint == 'admin.dashboard' %}active{% endif %}">Dashboard</a>
+            {% else %}
+                <a href="{{ url_for('officer.dashboard') }}" class="nav-link {% if request.endpoint == 'officer.dashboard' %}active{% endif %}">My Incidents</a>
+                <a href="{{ url_for('officer.report_incident') }}" class="nav-link {% if request.endpoint == 'officer.report_incident' %}active{% endif %}">Report Incident</a>
+            {% endif %}
+            <a href="{{ url_for('auth.logout') }}" class="nav-link logout">Logout</a>
+        </div>
+    </nav>
+    {% endif %}
+
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+{% block content %}
+<div class="login-page">
+    <div class="login-container">
+        <div class="login-logo">
+            <span class="login-logo-icon">⬡</span>
+            <div class="login-logo-title">BORDER<span>WATCH</span></div>
+            <span class="login-logo-sub">Border Monitoring & Incident Reporting System</span>
+        </div>
+
+        <div class="login-card">
+            <div class="login-card-title">🔒 Secure Authentication Required</div>
+
+            {% if error %}
+            <div class="alert alert-danger">⚠ {{ error }}</div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('auth.login') }}">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" placeholder="Enter username" autocomplete="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" placeholder="Enter password" autocomplete="current-password" required>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;">
+                            ▶ AUTHENTICATE
+                        </button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="login-demo">
+                <strong>Demo Credentials</strong><br>
+                Admin: <strong>admin</strong> / <strong>admin123</strong><br>
+                Officer 1: <strong>officer1</strong> / <strong>officer123</strong><br>
+                Officer 2: <strong>officer2</strong> / <strong>officer456</strong>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:20px; font-family:var(--font-mono); font-size:10px; color:var(--text-muted);">
+            SYSTEM TIME: <span id="current-time">—</span>
+        </div>
+    </div>
+</div>
+{% endblock %}

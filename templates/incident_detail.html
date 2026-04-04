@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Incident #{{ '%04d' % incident.id }}{% endblock %}
+{% block content %}
+
+{% if is_admin %}
+<a href="{{ url_for('admin.dashboard') }}" class="back-link">← Back to Admin Dashboard</a>
+{% else %}
+<a href="{{ url_for('officer.dashboard') }}" class="back-link">← Back to My Incidents</a>
+{% endif %}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Incident <span>#{{ '%04d' % incident.id }}</span></h1>
+        <div class="page-subtitle">{{ incident.type }} — {{ incident.datetime[:16] if incident.datetime else '' }}</div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;">
+        <span class="badge badge-{{ incident.severity|lower }}" style="font-size:13px;padding:6px 14px;">{{ incident.severity }} Severity</span>
+        {% if incident.status == 'Reported' %}
+        <span class="badge badge-reported" style="font-size:13px;padding:6px 14px;">{{ incident.status }}</span>
+        {% elif incident.status == 'Under Investigation' %}
+        <span class="badge badge-investigating" style="font-size:13px;padding:6px 14px;">Under Investigation</span>
+        {% else %}
+        <span class="badge badge-resolved" style="font-size:13px;padding:6px 14px;">{{ incident.status }}</span>
+        {% endif %}
+    </div>
+</div>
+
+<div class="detail-grid">
+
+    <!-- Incident Info -->
+    <div class="detail-card">
+        <div class="detail-section-title">📋 Incident Information</div>
+        <div class="detail-row">
+            <span class="detail-key">Incident ID</span>
+            <span class="detail-value" style="font-family:var(--font-mono);">#{{ '%04d' % incident.id }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-key">Type</span>
+            <span class="detail-value">{{ incident.type }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-key">Location</span>
+            <span class="detail-value">{{ incident.location }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-key">Severity</span>
+            <span class="detail-value"><span class="badge badge-{{ incident.severity|lower }}">{{ incident.severity }}</span></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-key">Status</span>
+            <span class="detail-value">
+                {% if incident.status == 'Reported' %}
+                <span class="badge badge-reported">{{ incident.status }}</span>
+                {% elif incident.status == 'Under Investigation' %}
+                <span class="badge badge-investigating">Under Investigation</span>
+                {% else %}
+                <span class="badge badge-resolved">{{ incident.status }}</span>
+                {% endif %}
+            </span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-key">Reported By</span>
+            <span class="detail-value">{{ incident.full_name }} <span style="color:var(--text-muted);font-family:var(--font-mono);font-size:11px;">({{ incident.username }})</span></span>
+        </div>
+        <div class="detail-row">
+            <span class="detail-key">Date & Time</span>
+            <span class="detail-value" style="font-family:var(--font-mono);font-size:12px;">{{ incident.datetime[:19] if incident.datetime else '—' }}</span>
+        </div>
+    </div>
+
+    <!-- Admin Status Update -->
+    {% if is_admin %}
+    <div class="detail-card">
+        <div class="detail-section-title">⚙ Update Incident Status</div>
+        <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;line-height:1.6;">
+            Change the current status of this incident. The reporting officer will see the updated status in their dashboard.
+        </p>
+        <form method="POST" action="{{ url_for('admin.update_status', incident_id=incident.id) }}">
+            <div class="form-group" style="margin-bottom:16px;">
+                <label for="status">New Status</label>
+                <select id="status" name="status">
+                    <option value="Reported" {% if incident.status == 'Reported' %}selected{% endif %}>Reported</option>
+                    <option value="Under Investigation" {% if incident.status == 'Under Investigation' %}selected{% endif %}>Under Investigation</option>
+                    <option value="Resolved" {% if incident.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Update Status</button>
+        </form>
+
+        <div class="divider"></div>
+        <div class="detail-section-title">📊 Status Timeline</div>
+        <div style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);line-height:2;">
+            <div style="color: {% if incident.status in ['Reported','Under Investigation','Resolved'] %}var(--accent){% else %}var(--text-muted){% endif %};">
+                ● Reported
+            </div>
+            <div style="margin-left:12px;color:var(--text-muted);font-size:10px;">│</div>
+            <div style="color: {% if incident.status in ['Under Investigation','Resolved'] %}var(--warning){% else %}var(--text-muted){% endif %};">
+                ● Under Investigation
+            </div>
+            <div style="margin-left:12px;color:var(--text-muted);font-size:10px;">│</div>
+            <div style="color: {% if incident.status == 'Resolved' %}var(--accent){% else %}var(--text-muted){% endif %};">
+                ● Resolved
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="detail-card">
+        <div class="detail-section-title">ℹ Status Information</div>
+        <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;">
+            Your incident is currently being processed. Status updates are managed by the border administration team.
+        </p>
+        <div class="divider"></div>
+        <div class="detail-section-title">📊 Status Timeline</div>
+        <div style="font-family:var(--font-mono);font-size:11px;line-height:2.2;">
+            <div style="color: {% if incident.status in ['Reported','Under Investigation','Resolved'] %}var(--accent){% else %}var(--text-muted){% endif %};">
+                ● Reported — Incident logged in the system
+            </div>
+            <div style="margin-left:12px;color:var(--text-muted);font-size:10px;">│</div>
+            <div style="color: {% if incident.status in ['Under Investigation','Resolved'] %}var(--warning){% else %}var(--text-muted){% endif %};">
+                ● Under Investigation — Team is reviewing
+            </div>
+            <div style="margin-left:12px;color:var(--text-muted);font-size:10px;">│</div>
+            <div style="color: {% if incident.status == 'Resolved' %}var(--accent){% else %}var(--text-muted){% endif %};">
+                ● Resolved — Case closed
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Description -->
+    <div class="detail-card detail-card-full">
+        <div class="detail-section-title">📝 Incident Description</div>
+        <div class="description-block">{{ incident.description }}</div>
+    </div>
+
+    <!-- Images & Analysis -->
+    {% if images %}
+    <div class="detail-card detail-card-full">
+        <div class="detail-section-title">🖼 Evidence Images & Analysis ({{ images|length }} file(s))</div>
+        {% for img in images %}
+        <div style="margin-bottom:28px; padding-bottom:28px; border-bottom: 1px solid var(--border);">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-bottom:10px;">IMAGE FILE</div>
+                    <img src="{{ url_for('auth.uploaded_file', filename=img.file_path) }}"
+                         alt="Evidence Image"
+                         class="img-preview"
+                         style="max-height:280px;object-fit:contain;width:100%;background:var(--bg-secondary);"
+                         onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+                    <div style="display:none;padding:20px;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius);font-family:var(--font-mono);font-size:12px;color:var(--text-muted);">
+                        Image not available
+                    </div>
+                    <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);margin-top:8px;">
+                        FILE: {{ img.file_path }}<br>
+                        UPLOADED: {{ img.uploaded_at[:16] if img.uploaded_at else '—' }}
+                    </div>
+                </div>
+                <div>
+                    <div style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-bottom:10px;">CV ANALYSIS RESULT</div>
+                    {% if img.analysis_result %}
+                        {% if '⚠' in img.analysis_result or 'SUSPICIOUS' in img.analysis_result or 'CAUTION' in img.analysis_result %}
+                        <div class="analysis-block suspicious">{{ img.analysis_result }}</div>
+                        {% else %}
+                        <div class="analysis-block clear">{{ img.analysis_result }}</div>
+                        {% endif %}
+                    {% else %}
+                    <div class="analysis-block">No analysis result available.</div>
+                    {% endif %}
+                    <div style="margin-top:12px;font-family:var(--font-mono);font-size:10px;color:var(--text-muted);line-height:1.8;">
+                        Analysis performed using OpenCV edge detection and contour analysis. Results are indicative only and require human review.
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="detail-card detail-card-full">
+        <div class="detail-section-title">🖼 Evidence Images</div>
+        <div style="font-family:var(--font-mono);font-size:12px;color:var(--text-muted);padding:20px 0;">
+            No images were submitted with this incident report.
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Officer Dashboard{% endblock %}
+{% block content %}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title">My <span>Incidents</span></h1>
+        <div class="page-subtitle">Officer Dashboard — {{ session.full_name }}</div>
+    </div>
+    <a href="{{ url_for('officer.report_incident') }}" class="btn btn-primary">+ Report Incident</a>
+</div>
+
+<div class="stats-grid">
+    <div class="stat-card">
+        <span class="stat-number">{{ stats.total }}</span>
+        <span class="stat-label">Total Reported</span>
+    </div>
+    <div class="stat-card info">
+        <span class="stat-number">{{ stats.reported }}</span>
+        <span class="stat-label">Pending Review</span>
+    </div>
+    <div class="stat-card warning">
+        <span class="stat-number">{{ stats.investigating }}</span>
+        <span class="stat-label">Investigating</span>
+    </div>
+    <div class="stat-card resolved">
+        <span class="stat-number">{{ stats.resolved }}</span>
+        <span class="stat-label">Resolved</span>
+    </div>
+</div>
+
+<div class="table-container">
+    <div class="table-header">
+        <span class="table-title">Incident Log</span>
+        <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">{{ incidents|length }} records</span>
+    </div>
+    {% if incidents %}
+    <table>
+        <thead>
+            <tr>
+                <th>#ID</th>
+                <th>Type</th>
+                <th>Location</th>
+                <th>Severity</th>
+                <th>Status</th>
+                <th>Date/Time</th>
+                <th>Images</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for incident in incidents %}
+            <tr>
+                <td><span class="id-badge">#{{ '%04d' % incident.id }}</span></td>
+                <td><a href="{{ url_for('officer.incident_detail', incident_id=incident.id) }}" class="incident-link">{{ incident.type }}</a></td>
+                <td>{{ incident.location }}</td>
+                <td>
+                    <span class="badge badge-{{ incident.severity|lower }}">{{ incident.severity }}</span>
+                </td>
+                <td>
+                    {% if incident.status == 'Reported' %}
+                    <span class="badge badge-reported">{{ incident.status }}</span>
+                    {% elif incident.status == 'Under Investigation' %}
+                    <span class="badge badge-investigating">Investigating</span>
+                    {% else %}
+                    <span class="badge badge-resolved">{{ incident.status }}</span>
+                    {% endif %}
+                </td>
+                <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-secondary);">
+                    {{ incident.datetime[:16] if incident.datetime else '—' }}
+                </td>
+                <td style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted);">
+                    {{ incident.image_count }} file(s)
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+        <span class="empty-state-icon">📋</span>
+        <div class="empty-state-text">No incidents reported yet</div>
+        <br>
+        <a href="{{ url_for('officer.report_incident') }}" class="btn btn-outline" style="margin-top:16px;">Report First Incident</a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}
