@@ -4,6 +4,7 @@ from models.image_processor import analyze_image
 import os
 import uuid
 from werkzeug.utils import secure_filename
+from models.email_service import send_admin_notification
 
 officer_bp = Blueprint('officer', __name__, url_prefix='/officer')
 
@@ -82,6 +83,10 @@ def report_incident():
 
             db.commit()
             db.close()
+            
+            # Send Email Notification
+            send_admin_notification(inc_type, location, severity, description, session['username'])
+            
             return redirect(url_for('officer.dashboard'))
 
     incident_types = [
