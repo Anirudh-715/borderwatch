@@ -49,5 +49,8 @@ Details:
 Please log in to the BorderWatch system to view more details.
 """
 
-    # Run synchronously to guarantee delivery in Gunicorn/Render deployments
-    _send_email_async(subject, body)
+    # Run in a background thread to prevent blocking the UI
+    import threading
+    thread = threading.Thread(target=_send_email_async, args=(subject, body))
+    thread.daemon = True
+    thread.start()
