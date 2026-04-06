@@ -34,7 +34,8 @@ def _send_email_async(subject, body):
 
 def send_admin_notification(incident_type, location, severity, description, officer_username):
     """
-    Sends an email to the admin with the details of the reported incident asynchronously.
+    Sends an email to the admin with the details of the reported incident.
+    (Synchronous execution to ensure WSGI workers don't kill the thread in production)
     """
     subject = f"BorderWatch Alert: New {severity} Severity Incident Reported"
     body = f"""A new incident has been reported by Officer {officer_username}.
@@ -48,7 +49,5 @@ Details:
 Please log in to the BorderWatch system to view more details.
 """
 
-    # Run in a background thread so it doesn't block the HTTP request
-    thread = threading.Thread(target=_send_email_async, args=(subject, body))
-    thread.daemon = True
-    thread.start()
+    # Run synchronously to guarantee delivery in Gunicorn/Render deployments
+    _send_email_async(subject, body)
