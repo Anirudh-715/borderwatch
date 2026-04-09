@@ -52,8 +52,8 @@ def init_db():
             "INSERT INTO users (username, password, role, full_name) VALUES (?, ?, ?, ?)",
             [
                 ('admin', 'admin123', 'admin', 'System Administrator'),
-                ('officer1', 'officer123', 'officer', 'James Ramirez'),
-                ('officer2', 'officer456', 'officer', 'Sarah Chen'),
+                ('officer1', 'officer123', 'officer', 'DEV KUMAR'),
+                ('officer2', 'officer456', 'officer', 'NAVJOT SINGH'),
             ]
         )
 

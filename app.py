@@ -16,7 +16,6 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(officer_bp)
 app.register_blueprint(admin_bp)
 
-# Initialize database on startup (works with both gunicorn and direct run)
 init_db()
 
 if __name__ == '__main__':
